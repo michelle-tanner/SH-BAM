@@ -12,6 +12,16 @@ export default function FeedbackModal({ rating, onSubmit, onClose }) {
     setSubmitting(false);
   };
 
+  const handleChipClick = async (chipText) => {
+    setSubmitting(true);
+    await onSubmit(chipText);
+    setSubmitting(false);
+  };
+
+  const negativeChips = ["Inaccurate", "Too Slow", "Too Long", "Confusing"];
+  const positiveChips = ["Great Detail", "Lightning Fast", "Very Helpful", "Perfect Length"];
+  const chips = rating <= 3 ? negativeChips : positiveChips;
+
   const ratingDescriptions = {
     1: "We're sorry it was awful. What went wrong?",
     2: "We'd like to do better. What was the issue?",
@@ -58,6 +68,20 @@ export default function FeedbackModal({ rating, onSubmit, onClose }) {
               "Help us understand what we can improve."}
           </p>
 
+          <div className="chips-container">
+            {chips.map(chip => (
+              <button
+                type="button"
+                key={chip}
+                className="chip-btn"
+                onClick={() => handleChipClick(chip)}
+                disabled={submitting}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
           <form onSubmit={handleSubmit} className="modal-form">
             <div className="textarea-wrapper">
               <textarea
@@ -81,12 +105,13 @@ export default function FeedbackModal({ rating, onSubmit, onClose }) {
                 className="btn btn-ghost"
                 id="modal-cancel-btn"
                 onClick={onClose}
+                disabled={submitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className={`btn ${comment.trim() ? "btn-primary" : "btn-secondary"}`}
                 id="modal-submit-btn"
                 disabled={submitting}
               >
@@ -96,7 +121,7 @@ export default function FeedbackModal({ rating, onSubmit, onClose }) {
                     Sending...
                   </span>
                 ) : (
-                  comment.trim() ? "Submit Feedback" : "Submit Rating"
+                  comment.trim() ? "Submit Feedback" : "Skip & Submit"
                 )}
               </button>
             </div>

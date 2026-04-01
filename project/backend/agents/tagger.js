@@ -44,6 +44,18 @@ const TAG_RULES = [
     tag: "slow",
     keywords: ["slow", "took too long", "wait", "loading", "lag", "speed", "timeout", "delayed"],
   },
+  {
+    tag: "positive",
+    keywords: ["love", "helpful", "good", "decent", "amazing", "awesome", "great", "excellent", "fast", "super", "fantastic"],
+  },
+  {
+    tag: "profanity",
+    keywords: ["fucking", "shit", "damn", "ass", "bitch", "crap", "fuck", "bullshit"],
+  },
+  {
+    tag: "negative",
+    keywords: ["bad", "terrible", "awful", "sucks", "poor", "worst", "garbage", "trash", "useless", "broken"],
+  },
 ];
 
 /**
@@ -53,7 +65,11 @@ const TAG_RULES = [
  * @returns {string[]} array of matched tag strings
  */
 function tagFeedback(comment, rating) {
-  if (!comment || !comment.trim()) return ["other"];
+  if (!comment || !comment.trim()) {
+    if (rating >= 4) return ["implicit_positive"];
+    if (rating <= 2) return ["implicit_negative"];
+    return ["implicit_neutral"];
+  }
 
   const lower = comment.toLowerCase();
   const matched = [];
@@ -72,8 +88,14 @@ function tagFeedback(comment, rating) {
     return matched.slice(0, 3);
   }
 
-  // If nothing matched, assign "other"
-  return matched.length > 0 ? matched : ["other"];
+  // If nothing matched, assign based on rating
+  if (matched.length === 0) {
+    if (rating >= 4) return ["general_positive"];
+    if (rating <= 2) return ["general_negative"];
+    return ["neutral"];
+  }
+
+  return matched;
 }
 
 module.exports = { tagFeedback };

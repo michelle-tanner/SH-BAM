@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "stats": "node view-feedback.js"
+    "stats": "node view-feedback.js",
+    "list": "node list-feedback.js"
   },
   "keywords": [],
   "author": "",

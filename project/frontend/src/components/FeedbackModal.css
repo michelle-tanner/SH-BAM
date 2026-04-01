@@ -16,7 +16,9 @@
 /* ── Modal Container ─────────────────────────────────────────────────── */
 .modal-container {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 460px;
@@ -59,7 +61,7 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -72,7 +74,7 @@
 .modal-close:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-primary);
-  border-color: var(--border-color-hover);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Body ────────────────────────────────────────────────────────────── */
@@ -104,8 +106,8 @@
   width: 100%;
   padding: 14px 16px;
   padding-bottom: 28px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-family);
@@ -135,6 +137,39 @@
   pointer-events: none;
 }
 
+/* ── Chips ───────────────────────────────────────────────────────────── */
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-family: var(--font-family);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-btn:hover:not(:disabled) {
+  border-color: var(--accent-purple);
+  color: var(--text-primary);
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.chip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Actions ─────────────────────────────────────────────────────────── */
 .modal-actions {
   display: flex;
@@ -160,13 +195,23 @@
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
 }
 
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
-  border-color: var(--border-color-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary {

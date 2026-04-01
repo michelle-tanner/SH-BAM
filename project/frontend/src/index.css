@@ -1,33 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-page: #f8f9fb;
-  --bg-white: #ffffff;
-  --bg-light: #f1f3f7;
-  --bg-hover: #eaecf2;
+  --bg-page: #0f172a;
+  --bg-white: rgba(30, 41, 59, 0.65);
+  --bg-light: rgba(15, 23, 42, 0.4);
+  --bg-hover: rgba(51, 65, 85, 0.5);
+  --bg-secondary: rgba(30, 41, 59, 0.8);
+  --bg-card: rgba(30, 41, 59, 0.85);
 
-  --text-primary: #1a1a2e;
-  --text-secondary: #5a5f7a;
-  --text-muted: #9498ad;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
 
-  --accent: #6366f1;
-  --accent-light: #818cf8;
-  --accent-bg: rgba(99, 102, 241, 0.08);
-  --accent-border: rgba(99, 102, 241, 0.2);
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+  --accent-bg: rgba(139, 92, 246, 0.15);
+  --accent-border: rgba(139, 92, 246, 0.3);
+  --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --gradient-card: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
 
   --green: #10b981;
   --green-bg: rgba(16, 185, 129, 0.08);
   --amber: #f59e0b;
   --red: #ef4444;
-  --red-light: #fee2e2;
+  --red-light: rgba(239, 68, 68, 0.12);
 
-  --border: #e2e5ee;
-  --border-light: #eef0f5;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.6);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.7);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.8);
+  --shadow-glow-purple: 0 4px 30px rgba(139, 92, 246, 0.15);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -48,7 +53,10 @@ html { font-size: 16px; scroll-behavior: smooth; }
 
 body {
   font-family: var(--font);
-  background: var(--bg-page);
+  background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+              var(--bg-page);
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

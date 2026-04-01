@@ -19,8 +19,10 @@
 .form-card {
   background: var(--bg-white);
   border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-purple);
   width: 100%;
   max-width: 520px;
   padding: 40px 36px;
