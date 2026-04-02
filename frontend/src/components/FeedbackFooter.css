@@ -1,0 +1,227 @@
+.feedback-footer {
+  width: 100%;
+  background: var(--navy);
+  padding: 48px 0;
+  margin-top: auto;
+
+  @media (max-width: 768px) {
+    padding: 36px 0;
+  }
+}
+
+.feedback-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+
+  @media (max-width: 768px) {
+    gap: 32px;
+  }
+}
+
+.feedback-section,
+.email-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.feedback-heading {
+  color: var(--white);
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.1px;
+  margin: 0;
+
+  @media (max-width: 480px) {
+    font-size: 16px;
+  }
+}
+
+/* ── Rating row ─────────────────────────────────────── */
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    gap: 10px;
+  }
+}
+
+.rating-label {
+  color: var(--white-80);
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 28px;
+  text-align: center;
+  user-select: none;
+}
+
+.rating-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
+}
+
+.rating-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  padding: 0;
+
+  &:hover {
+    background: var(--white-20);
+    transform: scale(1.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+  }
+
+  &--selected {
+    background: var(--white);
+    transform: scale(1.1);
+
+    &:hover {
+      background: var(--white-80);
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ── Comment form ────────────────────────────────────── */
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  animation: slide-down 0.2s ease-out;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-field {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--white-20);
+  background: var(--white-10);
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 15px;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.15s;
+
+  &::placeholder {
+    color: var(--white-80);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--white-80);
+  }
+}
+
+/* ── Email form ──────────────────────────────────────── */
+.email-form {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+.email-field {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--white-20);
+  background: var(--white-10);
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 15px;
+  transition: border-color 0.15s;
+
+  &::placeholder {
+    color: var(--white-80);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--white-80);
+  }
+}
+
+/* ── Shared submit button ────────────────────────────── */
+.feedback-submit-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1.5px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+  }
+}
+
+.feedback-thanks {
+  color: var(--white-80);
+  font-size: 15px;
+  text-align: center;
+}
+
+.feedback-error {
+  color: #fca5a5;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
