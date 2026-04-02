@@ -1,0 +1,12 @@
+# Web framework + server
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+
+# Pydantic v2 with email validation (used by FastAPI models)
+pydantic[email]>=2.0.0
+
+# Loads .env variables (FEEDBACK_ALERT_THRESHOLD, email credentials, Ollama config)
+python-dotenv>=1.0.0
+
+# SQLite ships with Python's standard library — no pip package needed.
+# [SQLite] If you later migrate to PostgreSQL, add: psycopg2-binary>=2.9
