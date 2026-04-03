@@ -61,15 +61,19 @@ function FeedbackFooter() {
 
           <div className="rating-row">
             <span className="rating-label">No</span>
-            <div className="rating-buttons" role="group" aria-label="Rating from 1 to 5">
+            <div className="rating-buttons">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  className={`rating-btn${selectedRating === n ? ' rating-btn--selected' : ''}`}
-                  onClick={() => handleRatingClick(n)}
-                  aria-label={`Rating ${n} out of 5`}
-                  aria-pressed={selectedRating === n}
-                />
+                <label key={n} className="rating-radio-label" aria-label={`Rating ${n} out of 5`}>
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={n}
+                    checked={selectedRating === n}
+                    onChange={() => handleRatingClick(n)}
+                    className="rating-radio-input"
+                  />
+                  <span className="rating-radio-circle" />
+                </label>
               ))}
             </div>
             <span className="rating-label">Yes</span>

@@ -1,6 +1,7 @@
 .guide-main {
   flex: 1;
   padding: 64px 0;
+  background-color: var(--white);
 
   @media (max-width: 768px) {
     padding: 40px 0;
@@ -22,7 +23,8 @@
 .guide-title {
   font-size: 42px;
   font-weight: 600;
-  color: var(--text-h);
+  /* color: var(--text-h); */
+  color: black;
   letter-spacing: -1.2px;
   margin: 0 0 12px;
 
@@ -46,6 +48,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  color: black;
 }
 
 .guide-item {
@@ -80,7 +83,8 @@
 .guide-section-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--text-h);
+  /* color: var(--text-h); */
+  color: black;
   margin: 0 0 8px;
   letter-spacing: -0.3px;
 }

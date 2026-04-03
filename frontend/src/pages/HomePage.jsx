@@ -16,10 +16,10 @@ function HomePage() {
   return (
     <main className="home-main">
       <div className="home-content container">
-        <h1 className="home-title">Research Reports</h1>
+        {/* <h1 className="home-title">Research Reports</h1>
         <p className="home-subtitle">
           Search across curated academic and industry reports.
-        </p>
+        </p> */}
 
         <form className="search-form" onSubmit={handleSearch} role="search">
           <div className="search-wrapper">
@@ -40,7 +40,7 @@ function HomePage() {
             <input
               type="search"
               className="search-input"
-              placeholder="Ask a question or search for a topic…"
+              placeholder="Ask SH-BAM about a report..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search query"

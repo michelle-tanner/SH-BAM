@@ -33,7 +33,7 @@
 .feedback-heading {
   color: var(--white);
   font-size: 18px;
-  font-weight: 500;
+  /* font-weight: 500; */
   text-align: center;
   letter-spacing: 0.1px;
   margin: 0;
@@ -56,8 +56,9 @@
 
 .rating-label {
   color: var(--white-80);
+  color: var(--white);
   font-size: 15px;
-  font-weight: 500;
+  /* font-weight: 500; */
   min-width: 28px;
   text-align: center;
   user-select: none;
@@ -73,39 +74,70 @@
   }
 }
 
-.rating-btn {
+.rating-radio-label {
+  display: flex;
+  cursor: pointer;
+}
+
+.rating-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rating-radio-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid var(--white);
+  border: 1px solid var(--white);
   background: transparent;
-  cursor: pointer;
   transition: background 0.15s, transform 0.1s;
-  padding: 0;
 
-  &:hover {
-    background: var(--white-20);
-    transform: scale(1.1);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--white);
-    outline-offset: 3px;
-  }
-
-  &--selected {
+  &::after {
+    content: '';
+    width: 34px;
+    height: 34px;
+    border-width: 4px;
+    border-color: var(--navy);
+    border-style: solid;
+    border-radius: 50%;
     background: var(--white);
-    transform: scale(1.1);
-
-    &:hover {
-      background: var(--white-80);
-    }
+    opacity: 0;
+    transition: opacity 0.15s;
   }
 
   @media (max-width: 480px) {
     width: 32px;
     height: 32px;
+
+    &::after {
+      width: 12px;
+      height: 12px;
+    }
   }
+}
+
+.rating-radio-label:hover .rating-radio-circle {
+  background: var(--white-20);
+  transform: scale(1.1);
+}
+
+.rating-radio-input:checked + .rating-radio-circle {
+  background: var(--white);
+  transform: scale(1.1);
+
+  &::after {
+    opacity: 1;
+  }
+}
+
+.rating-radio-input:focus-visible + .rating-radio-circle {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
 }
 
 /* ── Comment form ────────────────────────────────────── */
