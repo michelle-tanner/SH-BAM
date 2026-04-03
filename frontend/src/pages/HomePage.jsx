@@ -69,6 +69,8 @@ function HomePage() {
             </button>
           </div>
         </form>
+        <div className="home-placeholder">
+        </div>
       </div>
     </main>
   )

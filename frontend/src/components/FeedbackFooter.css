@@ -147,7 +147,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  animation: slide-down 0.2s ease-out;
+  animation: slide-down 0.45s cubic-bezier(0.25, 0.046, 0.45, 0.94);
 }
 
 @keyframes slide-down {
