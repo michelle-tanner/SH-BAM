@@ -12,6 +12,7 @@
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
+  --search-bg: #ebebeb;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #284360;
@@ -63,9 +64,10 @@ body {
 }
 
 #root {
-  min-height: 100svh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .container {

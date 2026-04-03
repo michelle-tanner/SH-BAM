@@ -33,7 +33,7 @@
 
 .logo-text {
   font-size: 18px;
-  font-weight: 600;
+  /* font-weight: 600; */
   color: var(--white);
   letter-spacing: 0.5px;
 
@@ -50,17 +50,18 @@
 
 .header-btn {
   background: transparent;
-  border: 1px solid var(--white-20);
-  color: var(--white-80);
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 500;
+  /* border: 1px solid var(--white-20); */
+  /* color: var(--white-80); */
+  color: white;
+  /* font-family: var(--sans); */
+  /* font-size: 14px; */
+  /* font-weight: 500; */
   padding: 7px 16px;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  white-space: nowrap;
+  /* transition: background 0.15s, border-color 0.15s, color 0.15s; */
+  /* white-space: nowrap; */
 
   &:hover {
     background: var(--white-10);
@@ -68,7 +69,7 @@
     color: var(--white);
   }
 
-  &--active {
+  &:active {
     background: var(--white-20);
     border-color: var(--white-20);
     color: var(--white);
@@ -87,8 +88,10 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--white-10);
-  border: 1.5px solid var(--white-20);
+  /* background: var(--white-10); */
+  background: transparent;
+  /* border: 1.5px solid var(--white-20); */
+  border: 1.5px solid var(--white);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   padding: 0;
