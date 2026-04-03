@@ -1,12 +1,18 @@
-# Web framework + server
+# ── Shared Infrastructure ─────────────────────────────────────────────────────
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0
-
-# Pydantic v2 with email validation (used by FastAPI models)
 pydantic[email]>=2.0.0
-
-# Loads .env variables (FEEDBACK_ALERT_THRESHOLD, email credentials, Ollama config)
 python-dotenv>=1.0.0
 
-# SQLite ships with Python's standard library — no pip package needed.
-# [SQLite] If you later migrate to PostgreSQL, add: psycopg2-binary>=2.9
+# ── Query System (System 1) ───────────────────────────────────────────────────
+llama-index>=0.10.0
+llama-index-vector-stores-chroma>=0.1.0
+llama-index-llms-ollama>=0.1.0
+llama-index-embeddings-ollama>=0.1.0   # local embeddings — no data sent externally
+chromadb>=0.5.0
+unstructured[pdf,docx]>=0.13.0
+
+# ── Feedback System (System 2) ────────────────────────────────────────────────
+crewai>=0.28.0
+ollama>=0.2.0
+# smtplib ships with Python stdlib — no pip package needed

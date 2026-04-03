@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { submitFeedback, subscribe } from '../api'
+import { submitFeedback, subscribe } from '../api/feedbackApi'
 import './FeedbackFooter.css'
 
 function FeedbackFooter() {
