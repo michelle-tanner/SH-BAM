@@ -44,6 +44,13 @@
   }
 }
 
+.home-placeholder {
+  width: 100%;
+  max-width: 640px;
+  height: 440px;
+  background: var(--white);
+  border-radius: 12px;
+}
 /* ── Search bar ──────────────────────────────────────── */
 .search-form {
   width: 100%;
