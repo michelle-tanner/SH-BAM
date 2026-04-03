@@ -11,6 +11,9 @@ Tables
 ------
   feedback             – user helpfulness ratings (1-5) and optional comments
   email_subscriptions  – weekly-digest email addresses (unique)
+  tags                 – category tags created by the Tagger agent
+  feedback_tags        – join table linking feedback rows to their assigned tags
+  review_queue         – tags that have crossed the alert threshold
 """
 
 import sqlite3
@@ -47,12 +50,48 @@ def init_db() -> None:
         """)
 
         # --- email_subscriptions ----------------------------------------------
-        # UNIQUE on email so duplicate subscribes are silently ignored.
         conn.execute("""
             CREATE TABLE IF NOT EXISTS email_subscriptions (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
                 email      TEXT NOT NULL UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # --- tags -------------------------------------------------------------
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tags (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                name        TEXT NOT NULL UNIQUE,
+                description TEXT,
+                is_active   INTEGER NOT NULL DEFAULT 1,
+                created_by  TEXT NOT NULL DEFAULT 'agent',
+                merged_into INTEGER REFERENCES tags(id),
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # --- feedback_tags ----------------------------------------------------
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS feedback_tags (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                feedback_id INTEGER NOT NULL REFERENCES feedback(id),
+                tag_id      INTEGER NOT NULL REFERENCES tags(id),
+                confidence  REAL,
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # --- review_queue -----------------------------------------------------
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS review_queue (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                tag_id          INTEGER NOT NULL REFERENCES tags(id),
+                tag_name        TEXT NOT NULL,
+                frequency       INTEGER NOT NULL,
+                sample_comments TEXT,
+                is_reviewed     INTEGER NOT NULL DEFAULT 0,
+                created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
     conn.close()
