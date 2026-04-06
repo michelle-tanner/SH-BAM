@@ -3,14 +3,21 @@ import { queryDocuments } from '../api/queryApi'
 import DocumentViewer from '../components/DocumentViewer'
 import ReportList from '../components/ReportList'
 import './HomePage.css'
-
+// npm run dev
 function HomePage() {
   const [query, setQuery] = useState('')
 
-  function handleSearch(e) {
+  async function handleSearch(e) {
     e.preventDefault()
     // TODO: send query to backend
     console.log('Search query:', query)
+    try {
+      await queryDocuments(query)
+    } catch {
+      setCommentError('Could not send feedback — please try again.')
+    } finally {
+      setCommentSubmitting(false)
+    }
   }
 
   return (

@@ -3,7 +3,8 @@ main.py
 -------
 FastAPI application entry point.  Run with:
 
-    uvicorn main:app --reload --port 8000
+    python -m uvicorn main:app --reload --port 8000
+    npm run dev 
 
 Mounts two fully isolated routers:
   /feedback-system — POST /feedback, POST /subscribe
