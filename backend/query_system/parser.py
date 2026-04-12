@@ -50,9 +50,12 @@ def parse_document(path: Path) -> str:
 
             doc = fitz.open(path)
             try:
-                return "\n\n".join(page.get_text() for page in doc)
+                text = "\n\n".join(page.get_text() for page in doc)
             finally:
                 doc.close()
+            if text.strip():
+                return text
+            # Empty → image-based/scanned PDF; fall through to unstructured
         except ImportError:
             pass
 
@@ -61,10 +64,23 @@ def parse_document(path: Path) -> str:
             from docx import Document
 
             doc = Document(str(path))
-            return "\n\n".join(p.text for p in doc.paragraphs if p.text.strip())
+            parts: list[str] = []
+            # Paragraphs (body text, headings)
+            parts.extend(p.text for p in doc.paragraphs if p.text.strip())
+            # Tables — python-docx only reads paragraphs by default; tables are skipped
+            for table in doc.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        if cell.text.strip():
+                            parts.append(cell.text.strip())
+            text = "\n\n".join(parts)
+            if text.strip():
+                return text
+            # Empty → content may be in text boxes or complex layout; fall through
         except ImportError:
             pass
 
+    # Last resort: unstructured handles edge cases (image PDFs with OCR, complex DOCX, etc.)
     from unstructured.partition.auto import partition
 
     elements = partition(filename=str(path))

@@ -22,7 +22,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from query_system.parser import guess_doc_date, parse_document
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DOCS_DIR = BACKEND_ROOT / "docs"
+DEFAULT_DOCS_DIR = BACKEND_ROOT / "query_system" / "docs"
 DEFAULT_CHROMA = BACKEND_ROOT / "index_store" / "chroma"
 DEFAULT_COLLECTION = os.getenv("CHROMA_COLLECTION", "reports")
 

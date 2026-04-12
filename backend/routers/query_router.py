@@ -23,7 +23,7 @@ from query_system.parser import guess_doc_date
 
 router = APIRouter()
 
-DOCS_DIR = os.path.abspath(os.getenv("DOCS_DIR", os.path.join(os.path.dirname(__file__), "..", "docs")))
+DOCS_DIR = os.path.abspath(os.getenv("DOCS_DIR", os.path.join(os.path.dirname(__file__), "..", "query_system", "docs")))
 
 
 def _run_synthesis(query: str) -> dict[str, Any]:
@@ -48,6 +48,11 @@ async def handle_query(body: QueryRequest) -> dict[str, Any]:
     if not body.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
+    print(f"\n{'='*60}")
+    print(f"[QUERY] {body.query.strip()!r}")
+    if body.date_range:
+        print(f"[QUERY] date_range: {body.date_range}")
+
     enriched = body.query.strip()
     if body.date_range:
         date_from = body.date_range.get("from", "") or body.date_range.get("start", "")
@@ -59,6 +64,8 @@ async def handle_query(body: QueryRequest) -> dict[str, Any]:
         query_type = _classify(enriched)
     except Exception:  # noqa: BLE001
         query_type = "retrieval"
+
+    print(f"[ROUTER] classified as → {query_type.upper()}")
 
     if query_type == "retrieval":
         return run_retrieval(body.query.strip(), date_range=body.date_range)

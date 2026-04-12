@@ -229,9 +229,16 @@ def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -
     """
     intent = parse_query_intent(raw_query, date_range=date_range)
 
+    print(f"[RETRIEVAL] keywords: {intent['keywords']}")
+    if intent.get("date_from") or intent.get("date_to"):
+        print(f"[RETRIEVAL] date filter: {intent.get('date_from')} → {intent.get('date_to')}")
+    else:
+        print("[RETRIEVAL] no date filter")
+
     try:
         index = _get_index()
     except Exception as exc:  # noqa: BLE001 — surface friendly message to UI
+        print(f"[RETRIEVAL] ERROR: could not open index — {exc}")
         return {
             "type": "retrieval",
             "intent": intent,
@@ -245,10 +252,12 @@ def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -
     if metadata_filters:
         retriever_kwargs["filters"] = metadata_filters
 
+    print(f"[RETRIEVAL] searching index (top_k={TOP_K})...")
     try:
         retriever = index.as_retriever(**retriever_kwargs)
         nodes = retriever.retrieve(intent["refined_query"])
     except Exception as exc:  # noqa: BLE001
+        print(f"[RETRIEVAL] ERROR: search failed — {exc}")
         return {
             "type": "retrieval",
             "intent": intent,
@@ -256,6 +265,8 @@ def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -
             "total": 0,
             "error": f"Search failed ({exc}). Is Ollama running with model {OLLAMA_EMBED_MODEL!r}?",
         }
+
+    print(f"[RETRIEVAL] {len(nodes)} raw chunks returned")
 
     seen: dict[str, dict[str, Any]] = {}
     for node in nodes:
@@ -275,6 +286,11 @@ def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -
             }
 
     results = sorted(seen.values(), key=lambda r: r["score"], reverse=True)
+    print(f"[RETRIEVAL] {len(results)} unique documents after de-duplication:")
+    for r in results:
+        print(f"  {r['score']:.4f}  {r['filename']}  ({r['doc_date']})")
+    print(f"{'='*60}\n")
+
     return {
         "type": "retrieval",
         "intent": intent,

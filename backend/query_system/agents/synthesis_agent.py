@@ -153,10 +153,13 @@ class _SynthesisAgent:
         if filters:
             retriever_kwargs["filters"] = filters
 
+        print(f"[SYNTHESIS] retrieving top {SYNTHESIS_TOP_K} chunks...")
         retriever = self.index.as_retriever(**retriever_kwargs)
         nodes = retriever.retrieve(query)
+        print(f"[SYNTHESIS] {len(nodes)} chunks retrieved")
 
         if not nodes:
+            print("[SYNTHESIS] no matching documents — returning early")
             return {
                 "type": "synthesis",
                 "content": "No documents matched your query. Try broadening your search or adding more documents.",
@@ -173,6 +176,9 @@ class _SynthesisAgent:
             filenames.append(filename)
             sources_block += f'\n<source filename="{filename}">\n{node.get_content()}\n</source>\n'
 
+        print(f"[SYNTHESIS] source files: {list(set(filenames))}")
+        print(f"[SYNTHESIS] sending to LLM ({OLLAMA_LLM_MODEL}) via CrewAI...")
+
         task = Task(
             description=(
                 f"Query: {query}\n\n"
@@ -188,6 +194,8 @@ class _SynthesisAgent:
 
         crew = Crew(agents=[self.crewai_agent], tasks=[task], verbose=False)
         result = crew.kickoff()
+        print(f"[SYNTHESIS] report generated ({len(str(result))} chars)")
+        print(f"{'='*60}\n")
 
         # TODO: Save generated report to docs/generated_reports/ once pipeline is stable.
         # When ready:

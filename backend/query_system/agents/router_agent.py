@@ -94,15 +94,20 @@ def classify(query: str) -> str:
     # ------------------------------------------------------------------
     # Tier 1: keyword fast-path
     # ------------------------------------------------------------------
-    if any(hint in q for hint in _SYNTHESIS_KEYWORDS):
+    matched = next((h for h in _SYNTHESIS_KEYWORDS if h in q), None)
+    if matched:
+        print(f"[ROUTER] Tier 1 match: synthesis keyword {matched!r}")
         return "synthesis"
 
-    if any(hint in q for hint in _RETRIEVAL_KEYWORDS):
+    matched = next((h for h in _RETRIEVAL_KEYWORDS if h in q), None)
+    if matched:
+        print(f"[ROUTER] Tier 1 match: retrieval keyword {matched!r}")
         return "retrieval"
 
     # ------------------------------------------------------------------
     # Tier 2: LLM classification for ambiguous queries
     # ------------------------------------------------------------------
+    print(f"[ROUTER] No Tier 1 keyword match — asking LLM ({OLLAMA_LLM_MODEL})...")
     try:
         from llama_index.llms.ollama import Ollama
 
@@ -114,11 +119,14 @@ def classify(query: str) -> str:
         prompt = _CLASSIFICATION_PROMPT.format(query=query)
         response = llm.complete(prompt)
         intent = (response.text or "").strip().lower()
+        print(f"[ROUTER] LLM raw response: {intent!r}")
 
         if "synthesis" in intent:
+            print("[ROUTER] Tier 2 result → synthesis")
             return "synthesis"
-        # Any other response (including unexpected LLM output) → retrieval
+        print("[ROUTER] Tier 2 result → retrieval")
         return "retrieval"
 
-    except Exception:  # noqa: BLE001 — Ollama down, timeout, etc.
+    except Exception as exc:  # noqa: BLE001 — Ollama down, timeout, etc.
+        print(f"[ROUTER] Tier 2 failed ({exc}) — defaulting to retrieval")
         return "retrieval"
