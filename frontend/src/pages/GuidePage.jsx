@@ -11,7 +11,7 @@ const GUIDE_SECTIONS = [
   },
   {
     title: 'Feedback',
-    body: 'After reviewing results, use the rating buttons in the footer to tell us how helpful the results were. Ratings of 1–3 let you leave a comment — we read every one.',
+    body: 'After reviewing results, use the rating buttons in the footer to tell us how helpful the results were. Ratings of 1–3 let you leave a comment — we read every single one.',
   },
   {
     title: 'Weekly digest',

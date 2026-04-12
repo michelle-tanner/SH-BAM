@@ -31,6 +31,14 @@
   height: 32px;
 }
 
+.logo-image {
+  display: block;
+  width: auto;
+  height: 28px;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .logo-text {
   font-size: 18px;
   /* font-weight: 600; */

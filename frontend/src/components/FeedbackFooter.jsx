@@ -16,6 +16,14 @@ function FeedbackFooter() {
 
   const showCommentField = selectedRating !== null && selectedRating <= 3 && !commentSubmitted
 
+  const ratingTaglines = {
+    1: 'Missed the mark',
+    2: 'Needs work',
+    3: 'Okay',
+    4: 'Good',
+    5: 'No complaints!',
+  }
+
   function handleRatingClick(rating) {
     setSelectedRating(rating)
     setCommentSubmitted(false)
@@ -55,29 +63,39 @@ function FeedbackFooter() {
   return (
     <footer className="feedback-footer">
       <div className="feedback-inner container">
-
-        <section className="feedback-section" aria-label="Helpfulness rating">
-          <p className="feedback-heading">Was this helpful?</p>
+          <section className="feedback-section" aria-label="Helpfulness rating">
+            <p className="feedback-heading">Was this helpful?</p>
 
           <div className="rating-row">
             <span className="rating-label">No</span>
             <div className="rating-buttons">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <label key={n} className="rating-radio-label" aria-label={`Rating ${n} out of 5`}>
-                  <input
-                    type="radio"
-                    name="rating"
-                    value={n}
-                    checked={selectedRating === n}
-                    onChange={() => handleRatingClick(n)}
-                    className="rating-radio-input"
-                  />
-                  <span className="rating-radio-circle" />
-                </label>
-              ))}
+              {[1, 2, 3, 4, 5].map((n) => {
+                const isSelected = selectedRating !== null && n <= selectedRating
+                return (
+                  <label
+                    key={n}
+                    className={`rating-radio-label ${isSelected ? 'selected' : ''}`}
+                    aria-label={`Rating ${n} out of 5`}
+                  >
+                    <input
+                      type="radio"
+                      name="rating"
+                      value={n}
+                      checked={selectedRating === n}
+                      onChange={() => handleRatingClick(n)}
+                      className="rating-radio-input"
+                    />
+                    <span className="rating-radio-circle" />
+                  </label>
+                )
+              })}
             </div>
             <span className="rating-label">Yes</span>
           </div>
+
+          {selectedRating !== null && (
+            <p className="rating-tagline">{ratingTaglines[selectedRating]}</p>
+          )}
 
           {showCommentField && (
             <form className="comment-form" onSubmit={handleFeedbackSubmit}>
@@ -133,7 +151,6 @@ function FeedbackFooter() {
             <p className="feedback-thanks">You&apos;re subscribed!</p>
           )}
         </section>
-
       </div>
     </footer>
   )
