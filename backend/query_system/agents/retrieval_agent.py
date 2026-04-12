@@ -2,8 +2,11 @@
 retrieval_agent.py
 ------------------
 1. Parse the user query into search intent (keywords + optional date window).
-2. Vector-search Chroma (LlamaIndex + Ollama embeddings) with metadata filters.
-3. Return ranked, de-duplicated documents for the frontend.
+2. Embed the query directly via the ollama Python client (bypasses LlamaIndex's
+   retriever layer which caches query embeddings globally and returns identical
+   scores across different queries in the same server session).
+3. Query ChromaDB directly with the fresh embedding vector.
+4. Return ranked, de-duplicated documents for the frontend.
 
 Called from query_router.handle_query when the route is classified as retrieval.
 """
@@ -18,9 +21,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import chromadb
-from llama_index.core import Settings, StorageContext, VectorStoreIndex
-from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.vector_stores.chroma import ChromaVectorStore
+import ollama as _ollama
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CHROMA = BACKEND_ROOT / "index_store" / "chroma"
@@ -104,10 +105,6 @@ def parse_query_intent(raw_query: str, date_range: Optional[dict[str, Any]] = No
         date_from = date_range.get("from") or date_range.get("start")
         date_to = date_range.get("to") or date_range.get("end")
 
-    if (not date_from or not date_to) and date_range:
-        # tolerate partial
-        pass
-
     if not date_from or not date_to:
         months = _parse_relative_months(q)
         if months is not None:
@@ -116,32 +113,10 @@ def parse_query_intent(raw_query: str, date_range: Optional[dict[str, Any]] = No
 
     words = [w.strip('.,?!()[]"\'') for w in q.split() if len(w.strip('.,?!()[]"\'')) > 2]
     stop = {
-        "the",
-        "and",
-        "for",
-        "with",
-        "from",
-        "that",
-        "this",
-        "have",
-        "has",
-        "was",
-        "were",
-        "are",
-        "about",
-        "give",
-        "documents",
-        "document",
-        "reports",
-        "report",
-        "please",
-        "show",
-        "find",
-        "search",
-        "last",
-        "past",
-        "months",
-        "month",
+        "the", "and", "for", "with", "from", "that", "this", "have", "has",
+        "was", "were", "are", "about", "give", "documents", "document",
+        "reports", "report", "please", "show", "find", "search", "last",
+        "past", "months", "month",
     }
     keywords = [w for w in words if w.lower() not in stop][:24]
 
@@ -156,61 +131,66 @@ def parse_query_intent(raw_query: str, date_range: Optional[dict[str, Any]] = No
     }
 
 
-def _build_metadata_filters(intent: dict[str, Any]):
-    from llama_index.core.vector_stores import (
-        FilterCondition,
-        FilterOperator,
-        MetadataFilter,
-        MetadataFilters,
-    )
-
-    filters: list = []
+def _build_chroma_where(intent: dict[str, Any]) -> Optional[dict]:
+    """
+    Translates structured intent into a ChromaDB `where` filter dict.
+    Date strings are compared lexicographically — valid for ISO YYYY-MM-DD.
+    """
+    conditions = []
     if intent.get("date_from"):
-        filters.append(
-            MetadataFilter(
-                key="doc_date",
-                value=intent["date_from"],
-                operator=FilterOperator.GTE,
-            )
-        )
+        conditions.append({"doc_date": {"$gte": intent["date_from"]}})
     if intent.get("date_to"):
-        filters.append(
-            MetadataFilter(
-                key="doc_date",
-                value=intent["date_to"],
-                operator=FilterOperator.LTE,
-            )
-        )
+        conditions.append({"doc_date": {"$lte": intent["date_to"]}})
     if intent.get("doc_type") and intent["doc_type"] != "any":
-        filters.append(
-            MetadataFilter(
-                key="doc_type",
-                value=intent["doc_type"],
-                operator=FilterOperator.EQ,
-            )
-        )
-    if not filters:
+        conditions.append({"doc_type": {"$eq": intent["doc_type"]}})
+
+    if not conditions:
         return None
-    return MetadataFilters(filters=filters, condition=FilterCondition.AND)
+    if len(conditions) == 1:
+        return conditions[0]
+    return {"$and": conditions}
 
 
-def _get_index() -> VectorStoreIndex:
-    embed_model = OllamaEmbedding(
-        model_name=OLLAMA_EMBED_MODEL,
-        base_url=OLLAMA_BASE_URL,
-    )
-    Settings.embed_model = embed_model
+# ---------------------------------------------------------------------------
+# ChromaDB singleton — connection opened once, reused across queries.
+# ---------------------------------------------------------------------------
+_chroma_collection: Optional[Any] = None
+
+
+def _get_collection():
+    global _chroma_collection
+    if _chroma_collection is not None:
+        return _chroma_collection
 
     CHROMA_PATH.mkdir(parents=True, exist_ok=True)
-    chroma_client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-    chroma_collection = chroma_client.get_or_create_collection(CHROMA_COLLECTION)
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    return VectorStoreIndex.from_vector_store(
-        vector_store,
-        storage_context=storage_context,
-        embed_model=embed_model,
+    client = chromadb.PersistentClient(path=str(CHROMA_PATH))
+    _chroma_collection = client.get_or_create_collection(
+        CHROMA_COLLECTION,
+        metadata={"hnsw:space": "cosine"},
     )
+    print(f"[RETRIEVAL] ChromaDB opened: collection={CHROMA_COLLECTION} (cosine distance)")
+    return _chroma_collection
+
+
+def _embed_query(text: str) -> list[float]:
+    """
+    Embeds query text directly via the ollama Python client.
+    Bypasses LlamaIndex's OllamaEmbedding wrapper which caches query vectors
+    globally in Settings, causing identical scores across different queries.
+    """
+    client = _ollama.Client(host=OLLAMA_BASE_URL)
+    response = client.embeddings(model=OLLAMA_EMBED_MODEL, prompt=text)
+    return response["embedding"]
+
+
+def _dist_to_score(distance: float) -> float:
+    """
+    Converts ChromaDB cosine distance to a similarity score (0–1).
+    ChromaDB cosine distance: 0 = identical, 1 = orthogonal, 2 = opposite.
+        score = 1 - (distance / 2)  →  1.0 = perfect match, 0.0 = opposite
+    Higher score = more relevant.
+    """
+    return round(max(0.0, 1.0 - distance / 2), 4)
 
 
 def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -> dict[str, Any]:
@@ -235,52 +215,75 @@ def run_retrieval(raw_query: str, date_range: Optional[dict[str, Any]] = None) -
     else:
         print("[RETRIEVAL] no date filter")
 
+    # Embed the query fresh on every call — no caching layer
+    print(f"[RETRIEVAL] embedding query via ollama ({OLLAMA_EMBED_MODEL})...")
     try:
-        index = _get_index()
-    except Exception as exc:  # noqa: BLE001 — surface friendly message to UI
-        print(f"[RETRIEVAL] ERROR: could not open index — {exc}")
-        return {
-            "type": "retrieval",
-            "intent": intent,
-            "results": [],
-            "total": 0,
-            "error": f"Could not open the search index ({exc}). Run `python -m query_system.ingest` after adding PDFs to docs/.",
-        }
-
-    metadata_filters = _build_metadata_filters(intent)
-    retriever_kwargs: dict[str, Any] = {"similarity_top_k": TOP_K}
-    if metadata_filters:
-        retriever_kwargs["filters"] = metadata_filters
-
-    print(f"[RETRIEVAL] searching index (top_k={TOP_K})...")
-    try:
-        retriever = index.as_retriever(**retriever_kwargs)
-        nodes = retriever.retrieve(intent["refined_query"])
+        query_vector = _embed_query(intent["refined_query"])
     except Exception as exc:  # noqa: BLE001
-        print(f"[RETRIEVAL] ERROR: search failed — {exc}")
+        print(f"[RETRIEVAL] ERROR: embedding failed — {exc}")
         return {
             "type": "retrieval",
             "intent": intent,
             "results": [],
             "total": 0,
-            "error": f"Search failed ({exc}). Is Ollama running with model {OLLAMA_EMBED_MODEL!r}?",
+            "error": f"Embedding failed ({exc}). Is Ollama running with model {OLLAMA_EMBED_MODEL!r}?",
         }
 
-    print(f"[RETRIEVAL] {len(nodes)} raw chunks returned")
+    try:
+        collection = _get_collection()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[RETRIEVAL] ERROR: could not open ChromaDB — {exc}")
+        return {
+            "type": "retrieval",
+            "intent": intent,
+            "results": [],
+            "total": 0,
+            "error": f"Could not open the search index ({exc}). Run `python -m query_system.ingest`.",
+        }
 
+    # Cap n_results to actual collection size to avoid ChromaDB errors
+    doc_count = collection.count()
+    n_results = min(TOP_K, max(1, doc_count))
+    where = _build_chroma_where(intent)
+
+    print(f"[RETRIEVAL] searching {doc_count} chunks (n_results={n_results})...")
+    try:
+        query_kwargs: dict[str, Any] = {
+            "query_embeddings": [query_vector],
+            "n_results": n_results,
+            "include": ["documents", "metadatas", "distances"],
+        }
+        if where:
+            query_kwargs["where"] = where
+        raw = collection.query(**query_kwargs)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[RETRIEVAL] ERROR: ChromaDB query failed — {exc}")
+        return {
+            "type": "retrieval",
+            "intent": intent,
+            "results": [],
+            "total": 0,
+            "error": f"Search failed ({exc}).",
+        }
+
+    texts = raw["documents"][0]
+    metas = raw["metadatas"][0]
+    distances = raw["distances"][0]
+    print(f"[RETRIEVAL] {len(texts)} raw chunks returned")
+
+    # De-duplicate by filename, keeping the highest-scoring chunk per document
     seen: dict[str, dict[str, Any]] = {}
-    for node in nodes:
-        meta = node.metadata or {}
+    for text, meta, dist in zip(texts, metas, distances):
         filename = meta.get("filename", "unknown")
-        score = float(node.score or 0.0)
-        snippet = (node.get_content() or "")[:400].strip()
+        score = _dist_to_score(dist)
+        snippet = (text or "")[:400].strip()
 
         if filename not in seen or score > float(seen[filename]["score"]):
             seen[filename] = {
                 "filename": filename,
                 "doc_date": meta.get("doc_date", ""),
                 "doc_type": meta.get("doc_type", "report"),
-                "score": round(score, 4),
+                "score": score,
                 "snippet": snippet,
                 "file_path": meta.get("file_path", f"/docs/{filename}"),
             }

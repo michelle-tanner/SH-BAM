@@ -75,7 +75,12 @@ def ingest_docs(
     except Exception:
         pass
 
-    chroma_collection = chroma_client.get_or_create_collection(collection_name)
+    # cosine distance is the correct metric for nomic-embed-text (unit-norm vectors).
+    # Must be set at collection creation — changing it later requires a full re-ingest.
+    chroma_collection = chroma_client.get_or_create_collection(
+        collection_name,
+        metadata={"hnsw:space": "cosine"},
+    )
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
