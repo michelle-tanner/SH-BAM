@@ -4,6 +4,7 @@
 from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama as LlamaOllama
 import chromadb
 from crewai import Agent, Task, Crew, LLM
 
@@ -24,6 +25,13 @@ Rules:
 
 class SynthesisAgent:
     def __init__(self, chroma_path: str = "query_system/index_store"):
+        # ── LLM for LlamaIndex (retrieval) ────────────────────────────────────
+        self.llama_llm = LlamaOllama(
+            model           = OLLAMA_MODEL,
+            base_url        = OLLAMA_BASE_URL,
+            request_timeout = 120.0,
+        )
+
         # ── LLM for CrewAI — must use crewai.LLM with ollama/ prefix ──────────
         self.crewai_llm = LLM(
             model    = f"ollama/{OLLAMA_MODEL}",
@@ -50,15 +58,14 @@ class SynthesisAgent:
 
         # ── CrewAI agent — explicitly using Ollama LLM ────────────────────────
         self.crewai_agent = Agent(
-            role        = "Medical Research Synthesis Specialist",
-            goal        = "Generate accurate, cited markdown summaries from AbbVie research documents",
-            backstory   = (
+            role      = "Medical Research Synthesis Specialist",
+            goal      = "Generate accurate, cited markdown summaries from AbbVie research documents",
+            backstory = (
                 "You are an expert at synthesizing pharmaceutical research. "
                 "You only draw conclusions from provided source documents and always cite your sources."
             ),
-            llm         = self.crewai_llm,
-            system_template = SYNTHESIS_SYSTEM_PROMPT,
-            verbose     = False,
+            llm       = self.crewai_llm,
+            verbose   = False,
         )
 
     def generate_report(self, query: str, date_range: dict | None = None) -> dict:
@@ -138,22 +145,26 @@ class SynthesisAgent:
         crew   = Crew(agents=[self.crewai_agent], tasks=[task], verbose=False)
         result = crew.kickoff()
 
-        # TODO: Save generated report to docs/generated_reports/
-        # When ready, implement the following:
-        #   1. Update the Task description prompt above to include an instruction like:
-        #      "Match the section structure and formatting conventions of the source documents above."
-        #      No separate template file needed — the retrieved source documents ARE the AbbVie
-        #      template. Since nodes already contains the relevant AbbVie reports, the LLM can
-        #      mirror their structure directly from sources_block.
-        #   2. After crew.kickoff(), write str(result) to a timestamped .md file, e.g.:
-        #        Path("query_system/docs/generated_reports").mkdir(exist_ok=True)
-        #        filename = f"generated_{datetime.date.today()}_{query[:30].replace(' ', '-')}.md"
-        #        Path(f"query_system/docs/generated_reports/{filename}").write_text(str(result))
-        #   3. Keep docs/generated_reports/ excluded from ingest_docs() so the LLM never
-        #      synthesizes from its own prior outputs (avoids hallucination drift).
+        # Strip CrewAI internal reasoning lines from output
+        content = str(result)
+        content = "\n".join(
+            line for line in content.splitlines()
+            if not line.strip().startswith("Thought:")
+        ).strip()
 
-        return {
+        synthesis_result = {
             "type"   : "synthesis",
-            "content": str(result),
+            "content": content,
             "sources": list(set(filenames)),
         }
+
+        # Save as formatted .docx in generated_docs/
+        try:
+            from query_system.docx_writer import save_as_docx
+            docx_path = save_as_docx(synthesis_result, query=query)
+            synthesis_result["docx_path"] = str(docx_path)
+        except Exception as e:
+            synthesis_result["docx_path"] = None
+            synthesis_result["docx_error"] = str(e)
+
+        return synthesis_result
