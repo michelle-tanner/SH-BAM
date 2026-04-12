@@ -45,3 +45,11 @@ export async function subscribe(email) {
   }
   return res.json()
 }
+
+export async function getTagFrequencies() {
+  const res = await fetch(`${BASE_URL}/feedback-system/tag-frequencies`)
+  if (!res.ok) {
+    throw new Error(`Failed to load tag frequencies: ${res.status}`)
+  }
+  return res.json()
+}

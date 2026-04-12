@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import abbvieLogo from '../assets/abbvie-logo.png'
 import './Header.css'
 
 function Header() {
@@ -12,7 +13,7 @@ function Header() {
             <rect width="32" height="32" rx="6" fill="white" fillOpacity="0.15" />
             <path d="M8 22L13 10L16 17L19 13L24 22H8Z" fill="white" />
           </svg> */}
-           <span className="logo-text">AbbVie Logo</span>  
+          <img src={abbvieLogo} alt="AbbVie logo" className="logo-image" />
         </Link>
 
         <nav className="header-nav" aria-label="Main navigation">
