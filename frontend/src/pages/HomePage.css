@@ -16,9 +16,65 @@
 .home-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
+  align-items: stretch;
+  gap: 24px;
+  text-align: left;
+  width: 100%;
+}
+
+.home-results {
+  width: 100%;
+  max-width: 1126px;
+  margin: 0 auto;
+}
+
+.home-alert {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.home-alert--error {
+  background: rgba(185, 28, 28, 0.08);
+  color: #991b1b;
+}
+
+.home-alert--info {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  border: 1px solid var(--accent-border);
+}
+
+.home-muted {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.home-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-panel--list {
+  min-width: 0;
+}
+
+.home-panel--viewer {
+  min-width: 0;
+  position: sticky;
+  top: 16px;
+
+  @media (max-width: 900px) {
+    position: static;
+  }
 }
 
 .home-title {
@@ -51,22 +107,20 @@
   background: var(--white);
   border-radius: 12px;
 }
-/* ── Search bar ──────────────────────────────────────── */
+
 .search-form {
   width: 100%;
   max-width: 640px;
+  align-self: center;
 }
 
 .search-wrapper {
   display: flex;
   align-items: center;
-  /* border: 1.5px solid var(--border); */
   border-radius: 12px;
-  /* background: var(--bg); */
   background: var(--search-bg);
   padding: 4px 4px 4px 16px;
   gap: 8px;
-  /* box-shadow: var(--shadow); */
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus-within {
@@ -99,7 +153,6 @@
     color: var(--text);
   }
 
-  /* Remove default search field X in WebKit */
   &::-webkit-search-decoration,
   &::-webkit-search-cancel-button {
     display: none;
@@ -145,8 +198,13 @@
   flex-shrink: 0;
   transition: background 0.15s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--navy-light);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 
   &:focus-visible {

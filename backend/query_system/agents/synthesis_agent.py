@@ -1,6 +1,16 @@
-from llama_index.core import VectorStoreIndex, StorageContext
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.llms.ollama import Ollama
-import chromadb
-from crewai import Agent, Task, Crew
+"""
+synthesis_agent.py
+------------------
+Placeholder until the synthesis pipeline is implemented.
+"""
+
+
+def run_synthesis(query: str) -> dict:
+    return {
+        "type": "synthesis",
+        "content": (
+            "Synthesis is not implemented yet. Try rephrasing as a document search "
+            f"(your request: {query[:200]!r}…)."
+        ),
+        "sources": [],
+    }
